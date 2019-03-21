@@ -12,11 +12,13 @@ import operator
 tag_class = {}
 
 # The tag you want to look up
-tag = ["crochet","fashion"]
+tag = ["crochet","fashion", "spring"]
 # Clean the tags (in case of user input)
 for i in range(0,len(tag)):
     tag[i] = tag[i].lower()
     tag[i] = tag[i].replace(" ","")
+if len(tag)>30:
+    tag = tag[0:29]
 # Add re listed words here
 redlist = ["artesanato","hechoamano", "ganchillo", "knitting", "feitoamano", \
            "fauxlocs", "tapetedecroche", "knit", "croche", "moda"]
