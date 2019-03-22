@@ -18,14 +18,20 @@ tag_class = {}
 def get_caption(html):
     return re.findall(r'{"text":(.*?)}', html)
 
-def get_hashtag_dict(caption, redlist = []):
+def get_hashtag_dict(caption, redlist = [], blocked_words = []):
     for txt in caption:
         # Isolate the hashtags from the photo captions
         tmp = re.findall(r'#(.*?) ',txt)
         for t in tmp:
+            blocked = []
             # Remove unwanted tags
-            if "\\" in t or "#" in t  or len(t) > 40 or t in redlist:
+            for bw in blocked_words:
+                if bw in t:
+                    blocked.append(t)
+                    log.write(bw + " found in " + t + ", ")
+            if "\\" in t or "#" in t  or len(t) > 40 or t in redlist or t in blocked:
                 tmp.remove(t)
+                log.write(t + " was removed\n")
             else:
                 # Count the occurances of the hashtags
                 if t in tag_class:
@@ -55,6 +61,7 @@ if len(tag)>30:
 # Add re listed words here
 redlist = ["artesanato","hechoamano", "ganchillo", "knitting", "feitoamano", \
            "fauxlocs", "tapetedecroche", "knit", "croche", "moda"]
+blocked_words = ["knit"]
 # Number of tags desired
 num_of_tags = 30
 link = []
@@ -89,7 +96,7 @@ for l in link:
             log.write("New tag file created: " + "data_files/" + str(t) + ".txt\n")
             
         html_file.close()
-        get_hashtag_dict(get_caption(html), redlist)
+        get_hashtag_dict(get_caption(html), redlist, blocked_words)
 # Sort the top amount of tags
 tag_class_sorted = dict(sorted(tag_class.items(), key=operator.itemgetter(1), reverse=True)[:num_of_tags])
 out = ""
