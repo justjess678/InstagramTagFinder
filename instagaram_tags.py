@@ -19,6 +19,7 @@ def get_caption(html):
     return re.findall(r'{"text":(.*?)}', html)
 
 def get_hashtag_dict(caption, redlist = [], blocked_words = []):
+    tags = []
     for txt in caption:
         # Isolate the hashtags from the photo captions
         tmp = re.findall(r'#(.*?) ',txt)
@@ -33,6 +34,8 @@ def get_hashtag_dict(caption, redlist = [], blocked_words = []):
                 tmp.remove(t)
                 log.write(t + " was removed\n")
             else:
+                if t not in tags:
+                    tags.append(t)
                 # Count the occurances of the hashtags
                 if t in tag_class:
                     tag_class[t] = tag_class.get(t) + 1
@@ -40,6 +43,7 @@ def get_hashtag_dict(caption, redlist = [], blocked_words = []):
                     tag_class[t] = 1
     if tag_class == {}:
         raise Exception("No associated hashtags!")
+    return tags
     #print(tag_class)
     
 def is_out_of_date(file):
@@ -61,8 +65,8 @@ if len(tag)>30:
     tag = tag[0:29]
     
 # Add re listed words here
-redlist = ["artesanato","hechoamano", "ganchillo", "knitting", "feitoamano", \
-           "fauxlocs", "tapetedecroche", "knit", "croche", "moda"]
+redlist = ["artesanato","hechoamano", "ganchillo", "feitoamano", \
+           "fauxlocs", "tapetedecroche", "croche", "moda"]
 blocked_words = ["knit"]
 # Number of tags desired
 num_of_tags = 30
@@ -101,7 +105,7 @@ for l in link:
         get_hashtag_dict(get_caption(html), redlist, blocked_words) == 0
 # Sort the top amount of tags
 tag_class_sorted = dict(sorted(tag_class.items(), key=operator.itemgetter(1), reverse=True)[:num_of_tags])
-out = ""
+out = ".\n.\n.\n.\n.\n.\n.\n.\n.\n.\n"
 for k in tag_class_sorted.keys():
     out = out + "#" + k + " "
 print(out)
