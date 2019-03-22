@@ -38,14 +38,16 @@ def get_hashtag_dict(caption, redlist = [], blocked_words = []):
                     tag_class[t] = tag_class.get(t) + 1
                 else:
                     tag_class[t] = 1
+    if tag_class == {}:
+        return 0
     #print(tag_class)
     
 def is_out_of_date(file):
     file_mod_time = os.stat(file).st_mtime
     return (time.time() - file_mod_time) > (30*60)
 
-# The tag you want to look up
-tag = ["crochet"]
+# The tags you want to look up
+tag = ["crochet","fashion","boho"]
 
 if len(tag) < 1:
     print("No tags input!")
@@ -96,7 +98,8 @@ for l in link:
             log.write("New tag file created: " + "data_files/" + str(t) + ".txt\n")
             
         html_file.close()
-        get_hashtag_dict(get_caption(html), redlist, blocked_words)
+        if get_hashtag_dict(get_caption(html), redlist, blocked_words) == 0:
+            raise Exception("No associated hashtags!")
 # Sort the top amount of tags
 tag_class_sorted = dict(sorted(tag_class.items(), key=operator.itemgetter(1), reverse=True)[:num_of_tags])
 out = ""
