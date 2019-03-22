@@ -102,7 +102,7 @@ for l in link:
             log.write("New tag file created: " + "data_files/" + str(t) + ".txt\n")
             
         html_file.close()
-        get_hashtag_dict(get_caption(html), redlist, blocked_words) == 0
+        tags = get_hashtag_dict(get_caption(html), redlist, blocked_words)
 # Sort the top amount of tags
 tag_class_sorted = dict(sorted(tag_class.items(), key=operator.itemgetter(1), reverse=True)[:num_of_tags])
 out = ".\n.\n.\n.\n.\n.\n.\n.\n.\n.\n"
