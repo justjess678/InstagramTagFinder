@@ -10,8 +10,10 @@ import re
 import operator
 import os
 import time
+from datetime import datetime as dt
 
-log = open("instagram_tags.log","a")
+log = open("instagram_tags.log","w")
+log.write("INSTAGRAM TAGS: " + str(dt.now())[0:-7] + "\n")
 
 tag_class = {}
 
@@ -29,10 +31,10 @@ def get_hashtag_dict(caption, redlist = [], blocked_words = []):
             for bw in blocked_words:
                 if bw in t:
                     blocked.append(t)
-                    log.write(bw + " found in " + t + ", ")
-            if "\\" in t or "#" in t  or len(t) > 40 or t in redlist or t in blocked:
+                    log.write(str(dt.now())[0:-7] +": " + bw + " found in " + t + ", ")
+            if "\\u" in t or "#" in t  or len(t) > 40 or t in redlist or t in blocked:
                 tmp.remove(t)
-                log.write(t + " was removed\n")
+                log.write(str(dt.now())[0:-7] + ": " + t + " was removed\n")
             else:
                 if t not in tags:
                     tags.append(t)
@@ -89,17 +91,17 @@ for l in link:
                 html = str(html)
                 html_file = open("data_files/" + str(t) + ".txt","w")
                 html_file.write(html)
-                log.write("Tag file updated: " + "data_files/" + str(t) + ".txt\n")
+                log.write(str(dt.now())[0:-7] + ": " + "Tag file updated: " + "data_files/" + str(t) + ".txt\n")
             else:
                 html_file = open("data_files/" + str(t) + ".txt","r")
                 html = html_file.read()
-                log.write("Tag file read from: " + "data_files/" + str(t) + ".txt\n")
+                log.write(str(dt.now())[0:-7] + ": " + "Tag file read from: " + "data_files/" + str(t) + ".txt\n")
         else:
             html = urlopen(l).read()
             html = str(html)
             html_file = open("data_files/" + str(t) + ".txt","w")
             html_file.write(html)
-            log.write("New tag file created: " + "data_files/" + str(t) + ".txt\n")
+            log.write(str(dt.now())[0:-7] + ": " + "New tag file created: " + "data_files/" + str(t) + ".txt\n")
             
         html_file.close()
         tags = get_hashtag_dict(get_caption(html), redlist, blocked_words)
