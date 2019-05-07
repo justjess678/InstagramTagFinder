@@ -6,10 +6,7 @@ Created on Thu Mar 21 20:59:00 2019
 @author: Jessica Chambers
 """
 from urllib.request import urlopen, HTTPError
-import re
-import operator
-import os
-import time
+import re,operator,os,time
 from datetime import datetime as dt
 
 log = open("instagram_tags.log","w")
@@ -23,6 +20,7 @@ tag_tuples = []
 tag_class_sorted = {}
 list_tags = []
 data_files_path = "data_files/"
+err=False
 
 def get_caption(html):
     return re.findall(r'{"text":(.*?)}', html)
@@ -52,7 +50,7 @@ def get_hashtag_dict(caption, redlist = [], blocked_words = []):
                 else:
                     tag_class[t] = 1
     if tag_class == {}:
-        raise Exception("No associated hashtags!")
+        raise Exception("No hashtags!")
     return tags
     
 def is_out_of_date(file):
@@ -62,7 +60,7 @@ def is_out_of_date(file):
 tag = ["mountain"]
 
 if len(tag) < 1:
-    raise Exception("No tags")
+    raise Exception("No hashtags")
 
 # Clean the tags (in case of user input)
 for i in range(0,len(tag)-1):
@@ -83,7 +81,6 @@ if not os.path.exists("data_files"):
 num_of_tags = 30
 html = None
 html_string = ""
-err=False
 
 for t in tag:
     if os.path.exists(data_files_path + t + ".txt") and os.path.getsize(data_files_path + t + ".txt") > 0 \
