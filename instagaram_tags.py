@@ -16,6 +16,13 @@ log = open("instagram_tags.log","w")
 log.write("INSTAGRAM TAGS: " + str(dt.now())[0:-7] + "\n")
 
 tag_class = {}
+num_photos = 0
+out = ".\n.\n.\n.\n.\n.\n.\n.\n.\n.\n"
+percentages = ""
+tag_tuples = []
+tag_class_sorted = {}
+list_tags = []
+data_files_path = "data_files/"
 
 def get_caption(html):
     return re.findall(r'{"text":(.*?)}', html)
@@ -24,6 +31,7 @@ def get_hashtag_dict(caption, redlist = [], blocked_words = []):
     tags = []
     for txt in caption:
         # Isolate the hashtags from the photo captions
+        txt = txt.lower()
         tmp = re.findall(r'#(.*?) ',txt)
         for t in tmp:
             blocked = []
@@ -31,10 +39,10 @@ def get_hashtag_dict(caption, redlist = [], blocked_words = []):
             for bw in blocked_words:
                 if bw in t:
                     blocked.append(t)
-                    log.write(str(dt.now())[0:-7] +": " + bw + " found in " + t + ", ")
-            if "\\u" in t or "#" in t  or len(t) > 40 or t in redlist or t in blocked:
+                    #log.write(str(dt.now())[0:-7] +": " + bw + " found in " + t + ", ")
+            if "\\u" in t or "#" in t or len(t) > 40 or t in redlist or t in blocked:
                 tmp.remove(t)
-                log.write(str(dt.now())[0:-7] + ": " + t + " was removed\n")
+                #log.write(str(dt.now())[0:-7] + ": " + t + " was removed\n")
             else:
                 if t not in tags:
                     tags.append(t)
@@ -46,69 +54,73 @@ def get_hashtag_dict(caption, redlist = [], blocked_words = []):
     if tag_class == {}:
         raise Exception("No associated hashtags!")
     return tags
-    #print(tag_class)
     
 def is_out_of_date(file):
-    file_mod_time = os.stat(file).st_mtime
-    return (time.time() - file_mod_time) > (30*60)
+    return (time.time() - os.stat(file).st_mtime) > (30*60)
 
 # The tags you want to look up
-tag = ["crochet","fashion","boho"]
+tag = ["apple", "dog", "cat"]
 
 if len(tag) < 1:
-    print("No tags input!")
     raise Exception("No tags")
 
 # Clean the tags (in case of user input)
 for i in range(0,len(tag)-1):
-    tag[i] = tag[i].lower()
-    tag[i] = tag[i].replace(" ","")
+    tag[i] = tag[i].lower().replace(" ","")
+    
 if len(tag)>30:
     tag = tag[0:29]
     
 # Add re listed words here
 redlist = ["artesanato","hechoamano", "ganchillo", "feitoamano", \
            "fauxlocs", "tapetedecroche", "croche", "moda"]
-blocked_words = ["knit"]
-# Number of tags desired
-num_of_tags = 30
-link = []
-for t in tag:
-    for i in range(1,11):
-        link.append("https://www.instagram.com/explore/tags/"+t+"/?hl=en&?page="+str(i))
-        
+blocked_words = ["knit", "cake", "choc", "like", "follow"]
+
 if not os.path.exists("data_files"):
     os.makedirs("data_files")
+    
+# Number of tags desired
+num_of_tags = 30
+html = None
+html_string = ""
 
-# MAIN   
-for l in link:
-    for t in tag:
-        html = None
-        if os.path.exists("data_files/" + str(t) + ".txt") and os.path.getsize("data_files/" + str(t) + ".txt") > 0:        
-            if is_out_of_date("data_files/" + str(t) + ".txt"):
-                #write to file
+for t in tag:
+    if os.path.exists(data_files_path + t + ".txt") and os.path.getsize(data_files_path + t + ".txt") > 0 \
+    and not is_out_of_date(data_files_path + t + ".txt"):
+        try:
+            data_file = open(data_files_path + t + ".txt","r")
+            html = data_file.read()
+            data_file.close()
+        except Exception as e:
+                print(e)
+    else:
+        for i in range(1,11):
+            l = ("https://www.instagram.com/explore/tags/"+t+"/?hl=en&?page="+str(i))
+            try:
                 html = urlopen(l).read()
-                html = str(html)
-                html_file = open("data_files/" + str(t) + ".txt","w")
-                html_file.write(html)
-                log.write(str(dt.now())[0:-7] + ": " + "Tag file updated: " + "data_files/" + str(t) + ".txt\n")
-            else:
-                html_file = open("data_files/" + str(t) + ".txt","r")
-                html = html_file.read()
-                log.write(str(dt.now())[0:-7] + ": " + "Tag file read from: " + "data_files/" + str(t) + ".txt\n")
-        else:
-            html = urlopen(l).read()
-            html = str(html)
-            html_file = open("data_files/" + str(t) + ".txt","w")
-            html_file.write(html)
-            log.write(str(dt.now())[0:-7] + ": " + "New tag file created: " + "data_files/" + str(t) + ".txt\n")
-            
-        html_file.close()
-        tags = get_hashtag_dict(get_caption(html), redlist, blocked_words)
+                data_file = open(data_files_path + t + ".txt","w+")
+                data_file.write(str(html))
+                data_file.close()
+            except Exception as e:
+                print(e)
+    #trim unecessary HTML
+    head, sep, tail = str(html).partition('</svg></span>')
+    head, sep, tail = tail.partition('</script>\n<script type="text/javascript">window.__initialDataLoaded(window._sharedData);</script>')
+    html_string += head
+    list_tags=(get_hashtag_dict(get_caption(html_string), redlist, blocked_words))
+
+num_photos = html_string.count("src")
+        
 # Sort the top amount of tags
 tag_class_sorted = dict(sorted(tag_class.items(), key=operator.itemgetter(1), reverse=True)[:num_of_tags])
-out = ".\n.\n.\n.\n.\n.\n.\n.\n.\n.\n"
+
 for k in tag_class_sorted.keys():
-    out = out + "#" + k + " "
+    tag_tuples.append((tag_class_sorted.get(k), k))
+tag_tuples.sort(key=lambda tup: -tup[0])
+for tt in tag_tuples:
+    out += "#" + tt[1] + " "
+    percentages += tt[1] + " = " + str(round(tt[0]/num_photos*100)) + "% of photos\n"
 print(out)
+print("\n\n\n\n")
+print(percentages)
 log.close()
