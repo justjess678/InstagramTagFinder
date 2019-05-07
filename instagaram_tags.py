@@ -59,7 +59,7 @@ def is_out_of_date(file):
     return (time.time() - os.stat(file).st_mtime) > (30*60)
 
 # The tags you want to look up
-tag = ["apple", "dog", "cat"]
+tag = ["mountain"]
 
 if len(tag) < 1:
     raise Exception("No tags")
@@ -83,6 +83,7 @@ if not os.path.exists("data_files"):
 num_of_tags = 30
 html = None
 html_string = ""
+err=False
 
 for t in tag:
     if os.path.exists(data_files_path + t + ".txt") and os.path.getsize(data_files_path + t + ".txt") > 0 \
@@ -93,6 +94,7 @@ for t in tag:
             data_file.close()
         except Exception as e:
                 print(e)
+                err=True
     else:
         for i in range(1,11):
             l = ("https://www.instagram.com/explore/tags/"+t+"/?hl=en&?page="+str(i))
@@ -103,6 +105,7 @@ for t in tag:
                 data_file.close()
             except Exception as e:
                 print(e)
+                err=True
     #trim unecessary HTML
     head, sep, tail = str(html).partition('</svg></span>')
     head, sep, tail = tail.partition('</script>\n<script type="text/javascript">window.__initialDataLoaded(window._sharedData);</script>')
@@ -124,3 +127,4 @@ print(out)
 print("\n\n\n\n")
 print(percentages)
 log.close()
+result = {"hashtags":out, "stats":percentages, "err":err}
