@@ -5,6 +5,7 @@ Created on Tue May  7 15:38:24 2019
 
 @author: jessica
 """
+import time
 import instagram_tags as insta
 from tkinter import *
 
@@ -34,11 +35,14 @@ def makeform(root, fields):
    return entries, num
 
 tag_info = {}
+var = None
+result_text=None
 
 def get_tags(tag, redlist, blocked_words, num_of_tags = 30):
     tag_info={'hashtags':"Loading..."}
     tag_info = insta.get_instagram_tags(tag, redlist, blocked_words, num_of_tags)
-    print("Tag info:" + str(tag_info))
+    var.set(str(tag_info.get('hashtags','')))
+    result_text.insert('1.0', var.get())
 
 def clear(ents):
     for e in ents:
@@ -48,6 +52,8 @@ def clear(ents):
 if __name__ == '__main__':
    root = Tk()
    root.title("Instagram Tag Generator")
+   var = StringVar(root)
+   
    ents, num = makeform(root, fields)
    root.bind('<Return>', (lambda event, e=ents: print(e[0][1].get(),e[1][1].get(),e[2][1].get(), e[3][1].get())))
    
@@ -60,7 +66,8 @@ if __name__ == '__main__':
    show_button.grid(column=2,columnspan=1, padx=5, pady=5, row=num+1)
    
    result_text = Text(root)
-   result_text.grid(column=0,columnspan=3, padx=5, pady=5, row=num+2, rowspan=4)
+   result_text.grid(column=0,columnspan=3, padx=5, pady=5, row=num+2, rowspan=3)
    result_text.insert('1.0',tag_info.get('hashtags',''))
    
    root.mainloop()
+   
