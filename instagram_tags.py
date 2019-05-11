@@ -13,10 +13,14 @@ import time
 from datetime import datetime as dt
 #import instagram_agents
 def get_instagram_tags(tag, redlist=[], blocked_words=[], num_of_tags=30):
+    if len(tag) < 1:
+        print("No tags input!")
+        raise Exception("No tags")
+        
     tag = str(tag).replace(' ','').split(',')
     log = open("instagram_tags.log","w")
     log.write("INSTAGRAM TAGS: " + str(dt.now())[0:-7] + "\n")
-    
+    tags = []
     tag_class = {}
     
     def get_caption(html):
@@ -38,26 +42,13 @@ def get_instagram_tags(tag, redlist=[], blocked_words=[], num_of_tags=30):
                     tmp.remove(t)
                     log.write(str(dt.now())[0:-7] + ": " + t + " was removed\n")
                 else:
-                    if t not in tags:
-                        tags.append(t)
-                    # Count the occurances of the hashtags
-                    if t in tag_class:
-                        tag_class[t] = tag_class.get(t) + 1
-                    else:
-                        tag_class[t] = 1
-        if tag_class == {}:
-            raise Exception("No associated hashtags!")
+                    tags.append(t)
         return tags
         #print(tag_class)
         
     def is_out_of_date(file):
         file_mod_time = os.stat(file).st_mtime
         return (time.time() - file_mod_time) > (30*60)
-    
-    
-    if len(tag) < 1:
-        print("No tags input!")
-        raise Exception("No tags")
     
     # Clean the tags (in case of user input)
     for i in range(0,len(tag)-1):
@@ -75,7 +66,7 @@ def get_instagram_tags(tag, redlist=[], blocked_words=[], num_of_tags=30):
                      "hijab", "nak","nik", "baya", "ak", "ja", "lularoe","ulzzang","order"]
     """
     # Number of tags desired
-    num_of_tags = 90
+    num_of_tags = int(num_of_tags)
     link = []
     for t in tag:
         for i in range(1,11):
@@ -83,32 +74,47 @@ def get_instagram_tags(tag, redlist=[], blocked_words=[], num_of_tags=30):
             
     if not os.path.exists("data_files"):
         os.makedirs("data_files")
-    
-    # MAIN   
-    for l in link:
-        for t in tag:
-            html = None
-            if os.path.exists("data_files/" + str(t) + ".txt") and os.path.getsize("data_files/" + str(t) + ".txt") > 0:        
-                if is_out_of_date("data_files/" + str(t) + ".txt"):
+        
+    # MAIN
+    for t in tag:
+        link=[]
+        for i in range(1,11):
+            link.append("https://www.instagram.com/explore/tags/"+t+"/?hl=en&?page="+str(i))
+        html = None
+        if os.path.exists("data_files/" + str(t) + ".txt") and os.path.getsize("data_files/" + str(t) + ".txt") > 0:        
+            print("Opening data_files/" + str(t) + ".txt")
+            if is_out_of_date("data_files/" + str(t) + ".txt"):
+                for l in link:
                     #write to file
                     html = urlopen(l).read()
                     html = str(html)
                     html_file = open("data_files/" + str(t) + ".txt","w")
                     html_file.write(html)
                     log.write(str(dt.now())[0:-7] + ": " + "Tag file updated: " + "data_files/" + str(t) + ".txt\n")
-                else:
-                    html_file = open("data_files/" + str(t) + ".txt","r")
-                    html = html_file.read()
-                    log.write(str(dt.now())[0:-7] + ": " + "Tag file read from: " + "data_files/" + str(t) + ".txt\n")
             else:
+                html_file = open("data_files/" + str(t) + ".txt","r")
+                html = html_file.read()
+                log.write(str(dt.now())[0:-7] + ": " + "Tag file read from: " + "data_files/" + str(t) + ".txt\n")
+        else:
+            for l in link:
+                print("Opening " + str(l))
                 html = urlopen(l).read()
                 html = str(html)
                 html_file = open("data_files/" + str(t) + ".txt","w")
                 html_file.write(html)
                 log.write(str(dt.now())[0:-7] + ": " + "New tag file created: " + "data_files/" + str(t) + ".txt\n")
-                
-            html_file.close()
-            tags = get_hashtag_dict(get_caption(html), redlist, blocked_words)
+            
+        html_file.close()
+        
+        tags= tags + get_hashtag_dict(get_caption(html), redlist, blocked_words)
+    tag_class={}
+    for t in tags:
+        if t in tag_class:
+            tag_class[t] = tag_class.get(t) + 1
+        else:
+            tag_class[t] = 1
+    if tag_class == {}:
+        raise Exception("No associated hashtags!")
     # Sort the top amount of tags
     tag_class_sorted = dict(sorted(tag_class.items(), key=operator.itemgetter(1), reverse=True)[:num_of_tags])
     out = ".\n.\n.\n.\n.\n.\n.\n.\n.\n.\n"
