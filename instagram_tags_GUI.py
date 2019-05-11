@@ -40,7 +40,7 @@ result_text=None
 
 def get_tags(tag, redlist, blocked_words, num_of_tags = 30):
     tag_info = insta.get_instagram_tags(tag, redlist, blocked_words, num_of_tags)
-    var.set(
+    var.set('')
     var.set(str(tag_info.get('hashtags','')))
     result_text.delete('1.0', END)
     result_text.insert('1.0', var.get())
@@ -56,7 +56,7 @@ if __name__ == '__main__':
    var = StringVar(root)
    
    ents, num = makeform(root, fields)
-   root.bind('<Return>', (lambda event, e=ents: fetch(e[0][1].get(),e[1][1].get(),e[2][1].get(), e[3][1].get())))
+   root.bind('<Return>', (lambda event, e=ents: get_tags(e[0][1].get(),e[1][1].get(),e[2][1].get(), e[3][1].get())))
    
    info_label = Label(root, text='Input tags separated by commas\neg: "cat, dog".\n\nBlocked tags are entire\ntags that will not be shown.\n\nIf a tag contains a blocked\nword it will not be shown')
    info_label.grid(column=2, columnspan=2,row=1,rowspan=3, padx=5, pady=5)
