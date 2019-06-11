@@ -12,7 +12,7 @@ import os
 import time
 from datetime import datetime as dt
 #import instagram_agents
-def get_instagram_tags(tag, redlist=[], blocked_words=[], num_of_tags=30):
+def get_instagram_tags(tag, redlist="", blocked_words="", num_of_tags=30):
     if len(tag) < 1:
         print("No tags input!")
         raise Exception("No tags")
@@ -52,8 +52,7 @@ def get_instagram_tags(tag, redlist=[], blocked_words=[], num_of_tags=30):
     
     # Clean the tags (in case of user input)
     for i in range(0,len(tag)-1):
-        tag[i] = tag[i].lower()
-        tag[i] = tag[i].replace(" ","")
+        tag[i] = tag[i].lower().replace(" ","")
     if len(tag)>30:
         tag = tag[0:29]
     """   
@@ -81,20 +80,13 @@ def get_instagram_tags(tag, redlist=[], blocked_words=[], num_of_tags=30):
         for i in range(1,11):
             link.append("https://www.instagram.com/explore/tags/"+t+"/?hl=en&?page="+str(i))
         html = None
+        if os.path.exists("data_files/" + str(t) + ".txt") and is_out_of_date("data_files/" + str(t) + ".txt"):
+            os.remove("data_files/" + str(t) + ".txt")
         if os.path.exists("data_files/" + str(t) + ".txt") and os.path.getsize("data_files/" + str(t) + ".txt") > 0:        
             print("Opening data_files/" + str(t) + ".txt")
-            if is_out_of_date("data_files/" + str(t) + ".txt"):
-                for l in link:
-                    #write to file
-                    html = urlopen(l).read()
-                    html = str(html)
-                    html_file = open("data_files/" + str(t) + ".txt","w")
-                    html_file.write(html)
-                    log.write(str(dt.now())[0:-7] + ": " + "Tag file updated: " + "data_files/" + str(t) + ".txt\n")
-            else:
-                html_file = open("data_files/" + str(t) + ".txt","r")
-                html = html_file.read()
-                log.write(str(dt.now())[0:-7] + ": " + "Tag file read from: " + "data_files/" + str(t) + ".txt\n")
+            html_file = open("data_files/" + str(t) + ".txt","r")
+            html = html_file.read()
+            log.write(str(dt.now())[0:-7] + ": " + "Tag file read from: " + "data_files/" + str(t) + ".txt\n")
         else:
             for l in link:
                 print("Opening " + str(l))
@@ -110,9 +102,7 @@ def get_instagram_tags(tag, redlist=[], blocked_words=[], num_of_tags=30):
     tag_class={}
     for t in tags:
         if t in tag_class:
-            tag_class[t] = tag_class.get(t) + 1
-        else:
-            tag_class[t] = 1
+            tag_class[t] = tag_class.get(t,0) + 1
     if tag_class == {}:
         raise Exception("No associated hashtags!")
     # Sort the top amount of tags
