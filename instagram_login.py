@@ -22,8 +22,7 @@ TOKEN
 "csrf_token":"BBET9xjbj6rTnAKjipKUQg8BAZUw8Ycz"
 
 """
-import requests
-import pdb
+import time
 from selenium import webdriver
 
 username = "scrapeme2019"
@@ -44,9 +43,7 @@ def login():
     
     #pdb.set_trace()
     username_in = dom.find_element_by_name("username")
-    print(username)
     password_in = dom.find_element_by_name("password")
-    print(password)
     login_button = dom.find_element_by_xpath('//*[@type="submit"]')
     
     username_in.clear()
@@ -55,15 +52,25 @@ def login():
     password_in.send_keys(password)
     
     login_button.click()
-    driver.get(login_url)
+    for i in range(0,5):
+        print(5-i,'\n...\n')
+        time.sleep(1)
     
     if 'logged-in' in driver.page_source:
         print('Logged in successfully')
         return True
     else:
         return False
-    
-if login():
-    print("logged in")
 
-driver.quit();
+def get_users_followers(user):
+    if login():
+        driver.get(url+user+'/followers/')
+    #class=wo9IH
+    #all_followers = driver.find_elements_by_xpath("//*[@class='wo9IH']")
+    #for follower in all_followers:
+        #print(follower.text)
+    
+get_users_followers('jesscomix')
+print("all done")
+
+#driver.quit();
