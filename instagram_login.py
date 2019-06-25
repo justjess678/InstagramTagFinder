@@ -23,28 +23,47 @@ TOKEN
 
 """
 import requests
-from lxml import html
-import re
+import pdb
+from selenium import webdriver
 
 username = "scrapeme2019"
 password = "ilovescraping"
 
-session_requests = requests.session()
-
 login_url = "https://www.instagram.com/accounts/login/"
 url = "https://www.instagram.com/"
-result = session_requests.get(login_url)
+# start chrome browser
+driver = webdriver.Chrome('./lib/chromedriver')
 
-csrf_token = re.findall(r'{"config":{"csrf_token":"(.*?)","viewer"',result.text)[0]
+def login():
+    # prepare the option for the chrome driver
+    options = webdriver.ChromeOptions()
+    options.add_argument('headless')
+    
+    driver.get(login_url)
+    dom = driver.find_element_by_xpath('//*')
+    
+    #pdb.set_trace()
+    username_in = dom.find_element_by_name("username")
+    print(username)
+    password_in = dom.find_element_by_name("password")
+    print(password)
+    login_button = dom.find_element_by_xpath('//*[@type="submit"]')
+    
+    username_in.clear()
+    password_in.clear()
+    username_in.send_keys(username)
+    password_in.send_keys(password)
+    
+    login_button.click()
+    driver.get(login_url)
+    
+    if 'logged-in' in driver.page_source:
+        print('Logged in successfully')
+        return True
+    else:
+        return False
+    
+if login():
+    print("logged in")
 
-payload = {"username": username, "password": password, "csrf_token": csrf_token}
-
-result = session_requests.post(
-	login_url, 
-	data = payload, 
-	headers = dict(referer=login_url)
-)
-
- # Scrape url
-result = session_requests.get(url, headers = dict(referer = url))
-print(result.text)
+driver.quit();
