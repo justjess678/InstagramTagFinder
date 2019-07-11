@@ -80,7 +80,7 @@ def get_users_following(user):
     load(3)
     try:
         following_button = driver.find_element_by_xpath('//a[@href="/'+user+'/following/"]')
-        total_following = int(following_button.text[:-10])
+        total_following = int(following_button.text[:-10].replace(',',''))
         following_button.click()
         load(3)
         # Load all followers (scroll down div item)
@@ -109,7 +109,7 @@ def get_users_followers(user, second=False):
     try:
         #click the followers button
         followers_button = driver.find_element_by_xpath('//a[@href="/'+user+'/followers/"]')
-        total_following = int(followers_button.text[:-10])
+        total_following = int(followers_button.text[:-10].replace(',',''))
         followers_button.click()
         load(3)
         # Load all followers (scroll down div item)
@@ -180,7 +180,7 @@ def get_top_followed_tags(list_tags, num_of_tags = 20):
             
 LOGGED = login()
 if LOGGED: 
-    followers = get_users_followers('transatlanticcrochet')
+    followers = get_users_followers('transatlanticcrochet',True)
     top_followers = get_top_users(followers)
     tags = get_users_followed_hashtags(followers)
     top_followers_tags = get_top_followed_tags(tags)
